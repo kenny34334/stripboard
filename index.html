@@ -426,7 +426,6 @@
                     isRemoteUpdate = false;
                 }
             } else {
-                // Eerste keer opslaan als er nog niets in de database staat
                 saveToFirebase();
             }
         });
@@ -542,7 +541,7 @@
                     dialoguePanel.id = `dialogue-panel-${strip.id}`;
                     dialoguePanel.className = `strip-dialogue-panel ${strip.dialogueOpen ? 'open' : ''}`;
                     dialoguePanel.innerHTML = `
-                        <textarea placeholder="Typ hier je dialoog of ideeën..." oninput="updateDialogue(${strip.id}, this.value)">${escapeHtml(strip.dialogue || '')}</textarea>
+                        <textarea placeholder="Typ hier je dialoog of ideeën..." onblur="updateDialogue(${strip.id}, this.value)">${escapeHtml(strip.dialogue || '')}</textarea>
                     `;
                     wrapper.appendChild(card);
                     wrapper.appendChild(dialoguePanel);
@@ -591,7 +590,7 @@
         window.updateDialogue = function(id, text) {
             const project = getCurrentProject();
             const strip = project.strips.find(s => s.id === id);
-            if (strip) {
+            if (strip && strip.dialogue !== text) {
                 strip.dialogue = text;
                 saveToFirebase();
             }
