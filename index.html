@@ -187,7 +187,7 @@
         .strip-card {
             background-color: #ffffff;
             border: 1px solid var(--border-color);
-            border-left: 5px solid #ffffff;
+            border-left: 5px solid #fbcfe8;
             border-radius: 4px;
             padding: 10px 14px;
             display: flex;
@@ -374,7 +374,7 @@
                     id: 1,
                     title: "Mijn Eerste Film",
                     strips: [
-                        { id: 101, title: "HMO3", color: "#ffffff", selected: false, dialogue: "", dialogueOpen: false, colorMenuOpen: false },
+                        { id: 101, title: "HMO3", color: "#fbcfe8", selected: false, dialogue: "", dialogueOpen: false, colorMenuOpen: false },
                         { id: 102, title: "HMO 2", color: "#fde047", selected: true, dialogue: "Idee: hier een spannende introductie.", dialogueOpen: false, colorMenuOpen: false },
                         { id: 103, title: "HMO", color: "#86efac", selected: false, dialogue: "", dialogueOpen: false, colorMenuOpen: false },
                         { id: 104, title: "fff", color: "#93c5fd", selected: false, dialogue: "", dialogueOpen: false, colorMenuOpen: false }
@@ -390,7 +390,7 @@
             { name: "Geel", value: "#fde047" },
             { name: "Groen", value: "#86efac" },
             { name: "Blauw", value: "#93c5fd" },
-            { name: "Wit", value: "#ffffff" }
+            { name: "Lichtroze", value: "#fbcfe8" }
         ];
 
         function init() {
@@ -454,7 +454,7 @@
 
                 const card = document.createElement('div');
                 card.className = `strip-card ${strip.selected ? 'selected' : ''}`;
-                card.style.borderLeftColor = strip.color || '#ffffff';
+                card.style.borderLeftColor = strip.color || '#fbcfe8';
                 card.draggable = true;
                 card.dataset.index = index;
 
@@ -489,7 +489,7 @@
                     <div class="strip-title">${escapeHtml(strip.title)}</div>
                     <div class="strip-right">
                         <button class="action-btn" title="Dialoog / ideeën" onclick="toggleDialogue(${strip.id})">💬</button>
-                        <button class="action-btn" title="Kies kleur" onclick="toggleColorMenu(${strip.id})" style="background-color: ${strip.color || '#ffffff'}; width: 24px; height: 24px; padding: 0; border-radius: 50%;"></button>
+                        <button class="action-btn" title="Kies kleur" onclick="toggleColorMenu(${strip.id})" style="background-color: ${strip.color || '#fbcfe8'}; width: 24px; height: 24px; padding: 0; border-radius: 50%;"></button>
                         <div class="color-picker-popup ${strip.colorMenuOpen ? '' : 'hidden'}">
                             ${colorDotsHtml}
                         </div>
@@ -560,7 +560,7 @@
             project.strips.push({
                 id: Date.now(),
                 title: text,
-                color: "#ffffff",
+                color: "#fbcfe8",
                 selected: false,
                 dialogue: "",
                 dialogueOpen: false,
