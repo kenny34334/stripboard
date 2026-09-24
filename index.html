@@ -204,7 +204,7 @@
             border-left-color: #10b981;
         }
 
-        /* Divider styling (dunne grijze balk zonder tekst) */
+        /* Divider styling */
         .strip-card.divider {
             background-color: #64748b;
             border: none;
@@ -251,7 +251,6 @@
             background-color: #e2e8f0;
         }
 
-        /* Kleurenmenu popover */
         .color-picker-popup {
             display: none;
             position: absolute;
@@ -285,7 +284,6 @@
             transform: scale(1.1);
         }
 
-        /* Uitklapbaar dialoog/ideeën vakje */
         .strip-dialogue-panel {
             display: none;
             background: #f8fafc;
@@ -365,7 +363,25 @@
         </div>
     </main>
 
-    <script>
+    <!-- Firebase App & Firestore SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoXqQbqO_bSaix921wjK4erDxjeG4ZNEg",
+            authDomain: "plotpoints-stripboard.firebaseapp.com",
+            projectId: "plotpoints-stripboard",
+            storageBucket: "plotpoints-stripboard.firebasestorage.app",
+            messagingSenderId: "242198898654",
+            appId: "1:242198898654:web:873b5b0d99464fcd849f4f",
+            measurementId: "G-75390QD1BN"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp);
+        const docRef = doc(db, "stripboards", "mainData");
+
         let appData = {
             projects: [
                 {
@@ -386,6 +402,7 @@
 
         let currentProjectId = 1;
         let draggedIndex = null;
+        let isRemoteUpdate = false;
 
         const customColors = [
             { name: "Geel", value: "#fde047" },
@@ -394,27 +411,36 @@
             { name: "Lichtroze", value: "#fbcfe8" }
         ];
 
-        function init() {
-            loadFromLocalStorage();
-            renderProjectDropdown();
-            renderWorkspace();
-            
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.strip-right')) {
-                    const project = getCurrentProject();
-                    let changed = false;
-                    project.strips.forEach(s => {
-                        if (s.colorMenuOpen) {
-                            s.colorMenuOpen = false;
-                            changed = true;
-                        }
-                    });
-                    if (changed) renderWorkspace();
+        // Luister direct naar wijzigingen in de Cloud (Realtime sync)
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const cloudData = docSnap.data();
+                if (cloudData && cloudData.projects) {
+                    isRemoteUpdate = true;
+                    appData = cloudData;
+                    if (!appData.projects.some(p => p.id === currentProjectId)) {
+                        currentProjectId = appData.projects[0].id;
+                    }
+                    renderProjectDropdown();
+                    renderWorkspace();
+                    isRemoteUpdate = false;
                 }
-            });
+            } else {
+                // Eerste keer opslaan als er nog niets in de database staat
+                saveToFirebase();
+            }
+        });
+
+        window.saveToFirebase = async function() {
+            if (isRemoteUpdate) return;
+            try {
+                await setDoc(docRef, appData);
+            } catch (e) {
+                console.error("Fout bij opslaan in Firebase:", e);
+            }
         }
 
-        function renderProjectDropdown() {
+        window.renderProjectDropdown = function() {
             const select = document.getElementById('projectSelect');
             select.innerHTML = '';
             appData.projects.forEach(project => {
@@ -429,7 +455,7 @@
             if (mainTitle && currentProj) mainTitle.innerText = currentProj.title;
         }
 
-        function switchProject(id) {
+        window.switchProject = function(id) {
             currentProjectId = Number(id);
             renderProjectDropdown();
             renderWorkspace();
@@ -439,7 +465,7 @@
             return appData.projects.find(p => p.id === currentProjectId) || appData.projects[0];
         }
 
-        function renderWorkspace() {
+        window.renderWorkspace = function() {
             const project = getCurrentProject();
             const container = document.getElementById('stripboardContainer');
             container.innerHTML = '';
@@ -466,7 +492,7 @@
                     card.className = `strip-card divider ${strip.selected ? 'selected' : ''}`;
                     card.addEventListener('click', (e) => {
                         strip.selected = !strip.selected;
-                        saveToLocalStorage();
+                        saveToFirebase();
                         renderWorkspace();
                     });
                     card.addEventListener('contextmenu', (e) => {
@@ -482,7 +508,7 @@
                     card.addEventListener('click', (e) => {
                         if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('.color-picker-popup')) return;
                         strip.selected = !strip.selected;
-                        saveToLocalStorage();
+                        saveToFirebase();
                         renderWorkspace();
                     });
 
@@ -529,17 +555,17 @@
             });
         }
 
-        function toggleDialogue(id) {
+        window.toggleDialogue = function(id) {
             const project = getCurrentProject();
             const strip = project.strips.find(s => s.id === id);
             if (strip) {
                 strip.dialogueOpen = !strip.dialogueOpen;
-                saveToLocalStorage();
+                saveToFirebase();
                 renderWorkspace();
             }
         }
 
-        function toggleColorMenu(id) {
+        window.toggleColorMenu = function(id) {
             const project = getCurrentProject();
             project.strips.forEach(s => {
                 if (s.id === id) {
@@ -551,27 +577,27 @@
             renderWorkspace();
         }
 
-        function setStripColor(id, color) {
+        window.setStripColor = function(id, color) {
             const project = getCurrentProject();
             const strip = project.strips.find(s => s.id === id);
             if (strip) {
                 strip.color = color;
                 strip.colorMenuOpen = false;
-                saveToLocalStorage();
+                saveToFirebase();
                 renderWorkspace();
             }
         }
 
-        function updateDialogue(id, text) {
+        window.updateDialogue = function(id, text) {
             const project = getCurrentProject();
             const strip = project.strips.find(s => s.id === id);
             if (strip) {
                 strip.dialogue = text;
-                saveToLocalStorage();
+                saveToFirebase();
             }
         }
 
-        function addStrip() {
+        window.addStrip = function() {
             const input = document.getElementById('newPlotInput');
             const text = input.value.trim();
             if (!text) return;
@@ -589,11 +615,11 @@
             });
 
             input.value = '';
-            saveToLocalStorage();
+            saveToFirebase();
             renderWorkspace();
         }
 
-        function editStrip(id) {
+        window.editStrip = function(id) {
             const project = getCurrentProject();
             const strip = project.strips.find(s => s.id === id);
             if (!strip || strip.type === 'divider') return;
@@ -601,30 +627,30 @@
             const newText = prompt("Bewerk plotpoint:", strip.title);
             if (newText !== null && newText.trim() !== "") {
                 strip.title = newText.trim();
-                saveToLocalStorage();
+                saveToFirebase();
                 renderWorkspace();
             }
         }
 
-        function deleteStrip(id) {
+        window.deleteStrip = function(id) {
             const project = getCurrentProject();
             project.strips = project.strips.filter(s => s.id !== id);
-            saveToLocalStorage();
+            saveToFirebase();
             renderWorkspace();
         }
 
-        function deleteSelectedStrips() {
+        window.deleteSelectedStrips = function() {
             const project = getCurrentProject();
             project.strips = project.strips.filter(s => !s.selected);
-            saveToLocalStorage();
+            saveToFirebase();
             renderWorkspace();
         }
 
-        function resetBoard() {
+        window.resetBoard = function() {
             if (confirm("Weet je zeker dat je het bord wilt legen?")) {
                 const project = getCurrentProject();
                 project.strips = [];
-                saveToLocalStorage();
+                saveToFirebase();
                 renderWorkspace();
             }
         }
@@ -659,7 +685,7 @@
 
             project.strips.splice(targetIndex, 0, movedItem);
 
-            saveToLocalStorage();
+            saveToFirebase();
             renderWorkspace();
         }
 
@@ -668,7 +694,7 @@
             draggedIndex = null;
         }
 
-        function addNewProject() {
+        window.addNewProject = function() {
             const title = prompt("Naam van het nieuwe filmproject:", "Nieuw Project");
             if (!title) return;
 
@@ -684,22 +710,22 @@
             });
 
             currentProjectId = newId;
-            saveToLocalStorage();
+            saveToFirebase();
             renderProjectDropdown();
             renderWorkspace();
         }
 
-        function renameCurrentProject() {
+        window.renameCurrentProject = function() {
             const project = getCurrentProject();
             const newTitle = prompt("Hernoem filmproject:", project.title);
             if (newTitle && newTitle.trim() !== "") {
                 project.title = newTitle.trim();
-                saveToLocalStorage();
+                saveToFirebase();
                 renderProjectDropdown();
             }
         }
 
-        function deleteCurrentProject() {
+        window.deleteCurrentProject = function() {
             if (appData.projects.length <= 1) {
                 alert("Je kunt het laatste project niet verwijderen.");
                 return;
@@ -707,7 +733,7 @@
             if (confirm("Weet je zeker dat je dit hele project wilt verwijderen?")) {
                 appData.projects = appData.projects.filter(p => p.id !== currentProjectId);
                 currentProjectId = appData.projects[0].id;
-                saveToLocalStorage();
+                saveToFirebase();
                 renderProjectDropdown();
                 renderWorkspace();
             }
@@ -718,26 +744,19 @@
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        function saveToLocalStorage() {
-            localStorage.setItem('desktop_stripboard_data', JSON.stringify(appData));
-        }
-
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('desktop_stripboard_data');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    if (parsed.projects && parsed.projects.length > 0) {
-                        appData = parsed;
-                        currentProjectId = appData.projects[0].id;
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.strip-right')) {
+                const project = getCurrentProject();
+                let changed = false;
+                project.strips.forEach(s => {
+                    if (s.colorMenuOpen) {
+                        s.colorMenuOpen = false;
+                        changed = true;
                     }
-                } catch (e) {
-                    console.error("Fout bij laden:", e);
-                }
+                });
+                if (changed) renderWorkspace();
             }
-        }
-
-        init();
+        });
     </script>
 </body>
 </html>
