@@ -12,11 +12,17 @@
       "type": "strip",
       "text": "HMO3",
       "color": "#ffffff",
-      "dialogue": ""
+      "dialogue": "][]["
     },
     {
       "type": "separator",
       "text": ""
+    },
+    {
+      "type": "strip",
+      "text": "HMO 2",
+      "color": "#bbf7d0",
+      "dialogue": ""
     },
     {
       "type": "strip",
@@ -26,7 +32,7 @@
     },
     {
       "type": "strip",
-      "text": "HMO 2",
+      "text": "fff",
       "color": "#ffffff",
       "dialogue": ""
     }
