@@ -204,6 +204,25 @@
             border-left-color: #10b981;
         }
 
+        /* Divider styling (dunne grijze balk zonder tekst) */
+        .strip-card.divider {
+            background-color: #64748b;
+            border: none;
+            border-left: none;
+            padding: 0;
+            height: 6px;
+            min-height: 6px;
+            border-radius: 3px;
+            cursor: grab;
+        }
+        .strip-card.divider:hover {
+            background-color: #475569;
+        }
+        .strip-card.divider.selected {
+            background-color: #10b981;
+            border: none;
+        }
+
         .strip-title {
             font-weight: 500;
             font-size: 0.95rem;
@@ -353,10 +372,13 @@
                     id: 1,
                     title: "Mijn Eerste Film",
                     strips: [
-                        { id: 101, title: "HMO3", color: "#fbcfe8", selected: false, dialogue: "", dialogueOpen: false, colorMenuOpen: false },
-                        { id: 102, title: "HMO 2", color: "#fde047", selected: true, dialogue: "Idee: hier een spannende introductie.", dialogueOpen: false, colorMenuOpen: false },
-                        { id: 103, title: "HMO", color: "#86efac", selected: false, dialogue: "", dialogueOpen: false, colorMenuOpen: false },
-                        { id: 104, title: "fff", color: "#93c5fd", selected: false, dialogue: "", dialogueOpen: false, colorMenuOpen: false }
+                        { id: 1, title: "", type: "divider", selected: false, colorMenuOpen: false },
+                        { id: 2, title: "", type: "divider", selected: false, colorMenuOpen: false },
+                        { id: 3, title: "", type: "divider", selected: false, colorMenuOpen: false },
+                        { id: 101, title: "HMO3", type: "strip", color: "#fbcfe8", selected: false, dialogue: "", dialogueOpen: false, colorMenuOpen: false },
+                        { id: 102, title: "HMO 2", type: "strip", color: "#fde047", selected: true, dialogue: "Idee: hier een spannende introductie.", dialogueOpen: false, colorMenuOpen: false },
+                        { id: 103, title: "HMO", type: "strip", color: "#86efac", selected: false, dialogue: "", dialogueOpen: false, colorMenuOpen: false },
+                        { id: 104, title: "fff", type: "strip", color: "#93c5fd", selected: false, dialogue: "", dialogueOpen: false, colorMenuOpen: false }
                     ]
                 }
             ]
@@ -423,7 +445,7 @@
             container.innerHTML = '';
 
             if (!project || project.strips.length === 0) {
-                container.innerHTML = `<div class="empty-state">Geen plotpoints gevonden. Voeg er een toe hierboven.</div>`;
+                container.innerHTML = `<div class="empty-state">Geen items gevonden. Voeg er een toe hierboven.</div>`;
                 return;
             }
 
@@ -432,8 +454,6 @@
                 wrapper.className = 'strip-wrapper';
 
                 const card = document.createElement('div');
-                card.className = `strip-card ${strip.selected ? 'selected' : ''}`;
-                card.style.borderLeftColor = strip.color || '#fbcfe8';
                 card.draggable = true;
                 card.dataset.index = index;
 
@@ -442,48 +462,69 @@
                 card.addEventListener('drop', handleDrop);
                 card.addEventListener('dragend', handleDragEnd);
 
-                card.addEventListener('click', (e) => {
-                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('.color-picker-popup')) return;
-                    strip.selected = !strip.selected;
-                    saveToLocalStorage();
-                    renderWorkspace();
-                });
+                if (strip.type === 'divider') {
+                    card.className = `strip-card divider ${strip.selected ? 'selected' : ''}`;
+                    card.addEventListener('click', (e) => {
+                        strip.selected = !strip.selected;
+                        saveToLocalStorage();
+                        renderWorkspace();
+                    });
+                    card.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        if (confirm(`Weet je zeker dat je deze divider wilt verwijderen?`)) {
+                            deleteStrip(strip.id);
+                        }
+                    });
+                } else {
+                    card.className = `strip-card ${strip.selected ? 'selected' : ''}`;
+                    card.style.borderLeftColor = strip.color || '#fbcfe8';
 
-                card.addEventListener('dblclick', () => {
-                    editStrip(strip.id);
-                });
+                    card.addEventListener('click', (e) => {
+                        if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('.color-picker-popup')) return;
+                        strip.selected = !strip.selected;
+                        saveToLocalStorage();
+                        renderWorkspace();
+                    });
 
-                card.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    if (confirm(`Weet je zeker dat je "${strip.title}" wilt verwijderen?`)) {
-                        deleteStrip(strip.id);
-                    }
-                });
+                    card.addEventListener('dblclick', () => {
+                        editStrip(strip.id);
+                    });
 
-                let colorDotsHtml = customColors.map(c => 
-                    `<button class="color-dot" style="background-color: ${c.value};" title="${c.name}" onclick="setStripColor(${strip.id}, '${c.value}')"></button>`
-                ).join('');
+                    card.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        if (confirm(`Weet je zeker dat je "${strip.title}" wilt verwijderen?`)) {
+                            deleteStrip(strip.id);
+                        }
+                    });
 
-                card.innerHTML = `
-                    <div class="strip-title">${escapeHtml(strip.title)}</div>
-                    <div class="strip-right">
-                        <button class="action-btn" title="Dialoog / ideeën" onclick="toggleDialogue(${strip.id})">✒️</button>
-                        <button class="action-btn" title="Kies kleur" onclick="toggleColorMenu(${strip.id})" style="background-color: ${strip.color || '#fbcfe8'}; width: 24px; height: 24px; padding: 0; border-radius: 50%;"></button>
-                        <div class="color-picker-popup ${strip.colorMenuOpen ? '' : 'hidden'}">
-                            ${colorDotsHtml}
+                    let colorDotsHtml = customColors.map(c => 
+                        `<button class="color-dot" style="background-color: ${c.value};" title="${c.name}" onclick="setStripColor(${strip.id}, '${c.value}')"></button>`
+                    ).join('');
+
+                    card.innerHTML = `
+                        <div class="strip-title">${escapeHtml(strip.title)}</div>
+                        <div class="strip-right">
+                            <button class="action-btn" title="Dialoog / ideeën" onclick="toggleDialogue(${strip.id})">✒️</button>
+                            <button class="action-btn" title="Kies kleur" onclick="toggleColorMenu(${strip.id})" style="background-color: ${strip.color || '#fbcfe8'}; width: 24px; height: 24px; padding: 0; border-radius: 50%;"></button>
+                            <div class="color-picker-popup ${strip.colorMenuOpen ? '' : 'hidden'}">
+                                ${colorDotsHtml}
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
 
-                const dialoguePanel = document.createElement('div');
-                dialoguePanel.id = `dialogue-panel-${strip.id}`;
-                dialoguePanel.className = `strip-dialogue-panel ${strip.dialogueOpen ? 'open' : ''}`;
-                dialoguePanel.innerHTML = `
-                    <textarea placeholder="Typ hier je dialoog of ideeën..." oninput="updateDialogue(${strip.id}, this.value)">${escapeHtml(strip.dialogue || '')}</textarea>
-                `;
+                    const dialoguePanel = document.createElement('div');
+                    dialoguePanel.id = `dialogue-panel-${strip.id}`;
+                    dialoguePanel.className = `strip-dialogue-panel ${strip.dialogueOpen ? 'open' : ''}`;
+                    dialoguePanel.innerHTML = `
+                        <textarea placeholder="Typ hier je dialoog of ideeën..." oninput="updateDialogue(${strip.id}, this.value)">${escapeHtml(strip.dialogue || '')}</textarea>
+                    `;
+                    wrapper.appendChild(card);
+                    wrapper.appendChild(dialoguePanel);
+                    container.appendChild(wrapper);
+                    return;
+                }
 
                 wrapper.appendChild(card);
-                wrapper.appendChild(dialoguePanel);
                 container.appendChild(wrapper);
             });
         }
@@ -539,6 +580,7 @@
             project.strips.push({
                 id: Date.now(),
                 title: text,
+                type: "strip",
                 color: "#fbcfe8",
                 selected: false,
                 dialogue: "",
@@ -554,7 +596,7 @@
         function editStrip(id) {
             const project = getCurrentProject();
             const strip = project.strips.find(s => s.id === id);
-            if (!strip) return;
+            if (!strip || strip.type === 'divider') return;
 
             const newText = prompt("Bewerk plotpoint:", strip.title);
             if (newText !== null && newText.trim() !== "") {
@@ -634,7 +676,11 @@
             appData.projects.push({
                 id: newId,
                 title: title.trim(),
-                strips: []
+                strips: [
+                    { id: Date.now() + 1, title: "", type: "divider", selected: false, colorMenuOpen: false },
+                    { id: Date.now() + 2, title: "", type: "divider", selected: false, colorMenuOpen: false },
+                    { id: Date.now() + 3, title: "", type: "divider", selected: false, colorMenuOpen: false }
+                ]
             });
 
             currentProjectId = newId;
