@@ -467,7 +467,7 @@
                 card.innerHTML = `
                     <div class="strip-title">${escapeHtml(strip.title)}</div>
                     <div class="strip-right">
-                        <button class="action-btn" title="Dialoog / ideeën" onclick="toggleDialogue(${strip.id})">💬</button>
+                        <button class="action-btn" title="Dialoog / ideeën" onclick="toggleDialogue(${strip.id})">✒️</button>
                         <button class="action-btn" title="Kies kleur" onclick="toggleColorMenu(${strip.id})" style="background-color: ${strip.color || '#fbcfe8'}; width: 24px; height: 24px; padding: 0; border-radius: 50%;"></button>
                         <div class="color-picker-popup ${strip.colorMenuOpen ? '' : 'hidden'}">
                             ${colorDotsHtml}
