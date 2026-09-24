@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Film Plot Stripboard Mobile</title>
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        header {
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0 0 12px 0;
+            color: var(--text-main);
+        }
+
+        .project-select-wrapper {
+            margin-bottom: 16px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 16px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+        }
+
+        .board-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .strip-item {
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .strip-text {
+            word-break: break-word;
+        }
+
+        .strip-dialogue {
+            font-size: 13px;
+            font-weight: normal;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(0,0,0,0.06);
+            padding-top: 4px;
+            margin-top: 2px;
+            white-space: pre-wrap;
+        }
+
+        .separator-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 0;
+        }
+
+        .separator-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--text-muted);
+            border-radius: 3px;
+        }
+
+        .separator-bar.main {
+            background-color: #334155;
+            height: 8px;
+        }
+
+        .loading, .error {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1 id="app-title">Film Stripboard</h1>
+        <div class="project-select-wrapper">
+            <select id="project-select" onchange="changeProject(this.value)">
+                <option value="">Projecten laden...</option>
+            </select>
+        </div>
+    </header>
+
+    <main>
+        <div id="board-container">
+            <div class="loading">Gegevens ophalen...</div>
+        </div>
+    </main>
+</div>
+
+<script>
+    let projectsData = {};
+    let currentProjectName = "";
+
+    async function loadProjects() {
+        try {
+            // Laad het JSON-bestand rechtstreeks uit de repository (cache-busting toegevoegd)
+            const response = await fetch('stripboard_projects.json?t=' + new Date().getTime());
+            if (!response.ok) throw new Error("Kan JSON bestand niet vinden.");
+            
+            const data = await response.json();
+            
+            if (Array.isArray(data)) {
+                projectsData = { "Mijn Eerste Film": data };
+            } else {
+                projectsData = data;
+            }
+
+            const projectNames = Object.keys(projectsData);
+            if (projectNames.length > 0) {
+                currentProjectName = projectNames[0];
+                populateDropdown();
+                renderBoard();
+            } else {
+                document.getElementById('board-container').innerHTML = '<div class="error">Geen projecten gevonden.</div>';
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('board-container').innerHTML = '<div class="error">Kon stripboard data niet laden. Zorg dat stripboard_projects.json in de map staat.</div>';
+        }
+    }
+
+    function populateDropdown() {
+        const select = document.getElementById('project-select');
+        select.innerHTML = '';
+        for (const name of Object.keys(projectsData)) {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            if (name === currentProjectName) option.selected = true;
+            select.appendChild(option);
+        }
+    }
+
+    function changeProject(name) {
+        if (projectsData[name]) {
+            currentProjectName = name;
+            renderBoard();
+        }
+    }
+
+    function renderBoard() {
+        document.getElementById('app-title').textContent = currentProjectName;
+        const container = document.getElementById('board-container');
+        const items = projectsData[currentProjectName] || [];
+
+        if (items.length === 0) {
+            container.innerHTML = '<div class="loading">Dit project heeft nog geen plotpoints.</div>';
+            return;
+        }
+
+        let html = '<ul class="board-list">';
+        let sepCount = 0;
+
+        for (const item of items) {
+            if (item.type === 'separator') {
+                sepCount++;
+                const barClass = sepCount === 1 ? 'separator-bar main' : 'separator-bar';
+                html += `<li class="separator-item"><div class="${barClass}"></div></li>`;
+            } else {
+                const bgColor = item.color || '#ffffff';
+                let borderColor = '#cbd5e1';
+                if (bgColor === '#fef08a') borderColor = '#eab308';
+                else if (bgColor === '#bbf7d0') borderColor = '#22c55e';
+                else if (bgColor === '#bae6fd') borderColor = '#0ea5e9';
+
+                let dialogueHtml = '';
+                if (item.dialogue && item.dialogue.trim() !== '') {
+                    dialogueHtml = `<div class="strip-dialogue">💬 ${escapeHtml(item.dialogue)}</div>`;
+                }
+
+                html += `
+                    <li class="strip-item" style="background-color: ${bgColor}; border: 1px solid ${borderColor};">
+                        <div class="strip-text">${escapeHtml(item.text || '')}</div>
+                        ${dialogueHtml}
+                    </li>
+                `;
+            }
+        }
+
+        html += '</ul>';
+        container.innerHTML = html;
+    }
+
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Direct laden bij openen van de pagina
+    loadProjects();
+</script>
+
+</body>
+</html>
