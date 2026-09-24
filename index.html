@@ -185,7 +185,6 @@
         }
 
         .strip-card {
-            background-color: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 10px 14px;
@@ -195,7 +194,7 @@
             box-sizing: border-box;
             cursor: grab;
             user-select: none;
-            transition: filter 0.1s, box-shadow 0.1s;
+            transition: filter 0.1s;
         }
 
         .strip-card:hover {
@@ -207,9 +206,9 @@
             cursor: grabbing;
         }
 
+        /* Geselecteerde balkjes krijgen geen randkleur meer, maar een subtiele donkere schaduw/transparantie */
         .strip-card.selected {
-            outline: 2px solid #10b981;
-            outline-offset: 1px;
+            box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.15);
         }
 
         .strip-title {
@@ -227,7 +226,7 @@
         }
 
         .action-btn {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.7);
             border: 1px solid var(--border-color);
             border-radius: 4px;
             padding: 4px 8px;
@@ -237,7 +236,7 @@
         }
 
         .action-btn:hover {
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95);
         }
 
         /* Kleurenmenu popover */
@@ -381,7 +380,7 @@
         let currentProjectId = 1;
         let draggedIndex = null;
 
-        // De 4 kleuren uit de afbeelding (#fde047 = geel, #86efac = groen, #93c5fd = blauw, #ffffff = wit/standaard)
+        // De 4 kleuren uit de afbeelding (#fde047 = geel, #86efac = groen, #93c5fd = blauw, #ffffff = wit)
         const customColors = [
             { name: "Geel", value: "#fde047" },
             { name: "Groen", value: "#86efac" },
