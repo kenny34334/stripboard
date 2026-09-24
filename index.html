@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stripboard Studio - Mobile First</title>
+    <title>Stripboard Studio - Compact</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -135,19 +135,20 @@
         .stripboard-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             margin-top: 15px;
         }
 
+        /* Compacte slanke balken */
         .strip-card {
             background-color: #1e293b;
             border: 1px solid var(--border-color);
             border-left: 6px solid var(--accent-color);
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 6px;
+            padding: 8px 12px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
             box-sizing: border-box;
             transition: transform 0.15s, box-shadow 0.15s;
             cursor: grab;
@@ -161,52 +162,23 @@
         .strip-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             gap: 10px;
         }
 
-        .strip-info {
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-            flex-grow: 1;
-        }
-
-        .scene-number {
-            font-weight: bold;
-            font-size: 1.1rem;
-            min-width: 45px;
-            background: rgba(255,255,255,0.05);
-            padding: 4px 8px;
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .scene-details {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            flex-grow: 1;
-        }
-
-        .scene-title {
+        .strip-title {
             font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .scene-desc {
-            color: var(--text-muted);
-            font-size: 0.85rem;
+            font-size: 0.95rem;
+            flex-grow: 1;
         }
 
         .scene-dialogue {
             background-color: rgba(0, 0, 0, 0.2);
             border-left: 3px solid var(--text-muted);
-            padding: 6px 10px;
-            font-size: 0.85rem;
+            padding: 4px 8px;
+            font-size: 0.8rem;
             color: #cbd5e1;
             border-radius: 0 4px 4px 0;
-            margin-top: 5px;
             font-style: italic;
             white-space: pre-wrap;
         }
@@ -217,20 +189,20 @@
             gap: 6px;
             justify-content: flex-end;
             border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 8px;
-            margin-top: 5px;
+            padding-top: 6px;
+            margin-top: 2px;
         }
 
         .strip-actions button {
-            padding: 6px 10px;
-            font-size: 0.8rem;
+            padding: 4px 8px;
+            font-size: 0.75rem;
         }
 
         .color-picker-wrapper {
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
             background: rgba(0,0,0,0.1);
             padding: 2px 6px;
@@ -240,8 +212,8 @@
 
         input[type="color"] {
             border: none;
-            width: 22px;
-            height: 22px;
+            width: 18px;
+            height: 18px;
             border-radius: 4px;
             cursor: pointer;
             background: none;
@@ -266,7 +238,7 @@
 <body>
 
     <header>
-        <h1>🎬 Stripboard Studio <span style="font-size: 0.75rem; color: var(--text-muted);">Mobile Beta</span></h1>
+        <h1>🎬 Stripboard Studio <span style="font-size: 0.75rem; color: var(--text-muted);">Compact</span></h1>
         <div class="toolbar">
             <label class="file-upload-btn" title="Importeer JSON">
                 📁 Import
@@ -308,8 +280,8 @@
                     id: 1,
                     title: "VUURWERK - Hoofdfilm",
                     strips: [
-                        { id: 101, scene: "Sc. 1", intExt: "EXT.", title: "Wijkplein - Nacht", pages: "2 3/8", desc: "Vuurwerk wordt afgestoken op het plein.", dialogue: "Hoor je dat? Prachtig man!", color: "#3b82f6" },
-                        { id: 102, scene: "Sc. 2", intExt: "INT.", title: "Woonkamer - Nacht", pages: "1 1/4", desc: "Gesprek over de jaarwisseling.", dialogue: "Gelukkig nieuwjaar allemaal!", color: "#10b981" }
+                        { id: 101, title: "Wijkplein - Nacht", pages: "2 3/8", dialogue: "Hoor je dat? Prachtig man!", color: "#3b82f6" },
+                        { id: 102, title: "Woonkamer - Nacht", pages: "1 1/4", dialogue: "Gelukkig nieuwjaar allemaal!", color: "#10b981" }
                     ]
                 }
             ]
@@ -350,7 +322,6 @@
             const project = getCurrentProject();
             if (!project) return;
 
-            // Stats update
             const totalPages = project.strips.reduce((acc, s) => acc + parsePages(s.pages), 0);
             document.getElementById('projectStats').innerText = `${project.strips.length} scènes | Geschat: ${(totalPages / 8).toFixed(1)} pag.`;
 
@@ -369,7 +340,6 @@
                 card.draggable = true;
                 card.dataset.index = index;
 
-                // Drag and drop events voor desktop & mobiele touch simulatie
                 card.addEventListener('dragstart', handleDragStart);
                 card.addEventListener('dragover', handleDragOver);
                 card.addEventListener('drop', handleDrop);
@@ -379,24 +349,18 @@
 
                 card.innerHTML = `
                     <div class="strip-header">
-                        <div class="strip-info">
-                            <span class="scene-number">${escapeHtml(strip.scene)}</span>
-                            <div class="scene-details">
-                                <div class="scene-title">${escapeHtml(strip.intExt || 'INT.')} ${escapeHtml(strip.title)}</div>
-                                <div class="scene-desc">${escapeHtml(strip.desc || '')}</div>
-                                ${dialogueHtml}
-                            </div>
-                        </div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted); text-align: right; min-width: 50px;">
+                        <div class="strip-title">${escapeHtml(strip.title)}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); min-width: 45px; text-align: right;">
                             ${escapeHtml(strip.pages)}p
                         </div>
                     </div>
+                    ${dialogueHtml}
                     <div class="strip-actions">
                         <div class="color-picker-wrapper" title="Kleur instellen">
                             🎨 <input type="color" value="${strip.color || '#3b82f6'}" onchange="updateStripColor(${strip.id}, this.value)">
                         </div>
-                        <button onclick="moveScene(${index}, -1)" ${index === 0 ? 'disabled style="opacity:0.4"' : ''}>⬆️ Omhoog</button>
-                        <button onclick="moveScene(${index}, 1)" ${index === project.strips.length - 1 ? 'disabled style="opacity:0.4"' : ''}>⬇️ Omlaag</button>
+                        <button onclick="moveScene(${index}, -1)" ${index === 0 ? 'disabled style="opacity:0.4"' : ''}>⬆️</button>
+                        <button onclick="moveScene(${index}, 1)" ${index === project.strips.length - 1 ? 'disabled style="opacity:0.4"' : ''}>⬇️</button>
                         <button onclick="editScene(${strip.id})">✏️ Bewerk</button>
                         <button class="danger" onclick="deleteScene(${strip.id})">🗑️</button>
                     </div>
@@ -405,7 +369,6 @@
             });
         }
 
-        // --- DRAG AND DROP LOGICA ---
         function handleDragStart(e) {
             draggedIndex = Number(this.dataset.index);
             this.classList.add('dragging');
@@ -433,7 +396,6 @@
             draggedIndex = null;
         }
 
-        // --- ACTIES VOOR SCÈNES ---
         function moveScene(index, direction) {
             const project = getCurrentProject();
             const newIndex = index + direction;
@@ -449,22 +411,16 @@
 
         function addScene() {
             const project = getCurrentProject();
-            const sceneNr = prompt("Scènenummer (bijv. Sc. 3):", `Sc. ${project.strips.length + 1}`);
-            if (!sceneNr) return;
-
-            const intExt = prompt("INT. of EXT.?", "INT.");
             const title = prompt("Locatie / Titel:", "Straat - Dag");
+            if (!title) return;
+
             const pages = prompt("Aantal pagina's (bijv. 1 2/8 of 2):", "1 0/8");
-            const desc = prompt("Korte beschrijving van de scène:", "");
             const dialogue = prompt("Belangrijke dialoog / notitie (optioneel):", "");
 
             project.strips.push({
                 id: Date.now(),
-                scene: sceneNr,
-                intExt: intExt || "INT.",
-                title: title || "Naamloze locatie",
+                title: title,
                 pages: pages || "1",
-                desc: desc || "",
                 dialogue: dialogue || "",
                 color: "#3b82f6"
             });
@@ -478,20 +434,14 @@
             const strip = project.strips.find(s => s.id === id);
             if (!strip) return;
 
-            const sceneNr = prompt("Scènenummer:", strip.scene);
-            if (sceneNr === null) return;
-
-            const intExt = prompt("INT. of EXT.?", strip.intExt);
             const title = prompt("Locatie / Titel:", strip.title);
+            if (title === null) return;
+
             const pages = prompt("Aantal pagina's:", strip.pages);
-            const desc = prompt("Beschrijving:", strip.desc);
             const dialogue = prompt("Dialoog / Notitie:", strip.dialogue);
 
-            strip.scene = sceneNr;
-            strip.intExt = intExt;
             strip.title = title;
             strip.pages = pages;
-            strip.desc = desc;
             strip.dialogue = dialogue;
 
             saveToLocalStorage();
@@ -516,7 +466,6 @@
             renderWorkspace();
         }
 
-        // --- PROJECT BEHEER ---
         function addNewProject() {
             const title = prompt("Naam van het nieuwe filmproject:", "Nieuwe Film");
             if (!title) return;
@@ -548,7 +497,6 @@
             renderWorkspace();
         }
 
-        // --- HELPERS ---
         function parsePages(pagesStr) {
             if (!pagesStr) return 8;
             let parts = pagesStr.trim().split(' ');
@@ -570,13 +518,12 @@
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // --- OPSLAAN & LADEN ---
         function saveToLocalStorage() {
-            localStorage.setItem('stripboard_mobile_data', JSON.stringify(appData));
+            localStorage.setItem('stripboard_compact_data', JSON.stringify(appData));
         }
 
         function loadFromLocalStorage() {
-            const saved = localStorage.getItem('stripboard_mobile_data');
+            const saved = localStorage.getItem('stripboard_compact_data');
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
@@ -590,7 +537,6 @@
             }
         }
 
-        // --- EXPORT & IMPORT ---
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 4));
             const downloadAnchor = document.createElement('a');
