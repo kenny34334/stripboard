@@ -242,6 +242,7 @@
             background-color: #e2e8f0;
         }
 
+        /* Kleurenmenu popover */
         .color-picker-popup {
             display: none;
             position: absolute;
@@ -275,6 +276,7 @@
             transform: scale(1.1);
         }
 
+        /* Uitklapbaar dialoog/ideeën vakje */
         .strip-dialogue-panel {
             display: none;
             background: #f8fafc;
@@ -328,8 +330,9 @@
                     <!-- Dynamisch -->
                 </select>
             </div>
+            <button onclick="exportData()">📥 Download</button>
             
-            <!-- Upload knop (opent bestandskiezer direct) -->
+            <!-- Directe upload knop zonder extra menu -->
             <button class="file-upload-btn" onclick="document.getElementById('importFile').click()">
                 📤 Upload
             </button>
@@ -707,6 +710,16 @@
                     console.error("Fout bij laden:", e);
                 }
             }
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 4));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "film_stripboard_project.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
         }
 
         function importData(event) {
