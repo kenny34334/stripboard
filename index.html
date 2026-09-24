@@ -242,7 +242,6 @@
             background-color: #e2e8f0;
         }
 
-        /* Kleurenmenu popover */
         .color-picker-popup {
             display: none;
             position: absolute;
@@ -276,7 +275,6 @@
             transform: scale(1.1);
         }
 
-        /* Uitklapbaar dialoog/ideeën vakje */
         .strip-dialogue-panel {
             display: none;
             background: #f8fafc;
@@ -330,11 +328,13 @@
                     <!-- Dynamisch -->
                 </select>
             </div>
-            <button onclick="exportData()">📥 Download</button>
-            <label class="file-upload-btn">
+            
+            <!-- Upload knop (opent bestandskiezer direct) -->
+            <button class="file-upload-btn" onclick="document.getElementById('importFile').click()">
                 📤 Upload
-                <input type="file" id="importFile" accept=".json" onchange="importData(event)">
-            </label>
+            </button>
+            <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+
             <button class="dark-btn" onclick="addNewProject()">+ Nieuw</button>
             <button onclick="renameCurrentProject()">Hernoem</button>
             <button class="danger-text" onclick="deleteCurrentProject()">Verwijder</button>
@@ -383,7 +383,6 @@
         let currentProjectId = 1;
         let draggedIndex = null;
 
-        // De 4 kleuren uit de afbeelding (#fde047 = geel, #86efac = groen, #93c5fd = blauw, #64748b = standaard/wit grijsachtig)
         const customColors = [
             { name: "Geel", value: "#fde047" },
             { name: "Groen", value: "#86efac" },
@@ -396,7 +395,6 @@
             renderProjectDropdown();
             renderWorkspace();
             
-            // Sluit kleurenmenu's als je ergens anders klikt
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.strip-right')) {
                     const project = getCurrentProject();
@@ -480,7 +478,6 @@
                     }
                 });
 
-                // Genereer HTML voor de 4 kleurbolletjes in het pop-up menu
                 let colorDotsHtml = customColors.map(c => 
                     `<button class="color-dot" style="background-color: ${c.value};" title="${c.name}" onclick="setStripColor(${strip.id}, '${c.value}')"></button>`
                 ).join('');
@@ -496,7 +493,6 @@
                     </div>
                 `;
 
-                // Uitklapbaar paneel voor dialoog / ideeën
                 const dialoguePanel = document.createElement('div');
                 dialoguePanel.id = `dialogue-panel-${strip.id}`;
                 dialoguePanel.className = `strip-dialogue-panel ${strip.dialogueOpen ? 'open' : ''}`;
@@ -711,16 +707,6 @@
                     console.error("Fout bij laden:", e);
                 }
             }
-        }
-
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 4));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "film_stripboard_project.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
         }
 
         function importData(event) {
