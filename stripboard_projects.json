@@ -20,13 +20,13 @@
     },
     {
       "type": "strip",
-      "text": "HMO",
+      "text": "HMO3",
       "color": "#ffffff",
       "dialogue": ""
     },
     {
       "type": "strip",
-      "text": "HMO3",
+      "text": "HMO",
       "color": "#ffffff",
       "dialogue": ""
     }
