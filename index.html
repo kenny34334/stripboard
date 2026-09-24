@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stripboard Studio - Beta</title>
+    <title>Stripboard Studio - Mobile First</title>
     <style>
         :root {
-            --bg-color: #121212;
-            --panel-bg: #1e1e1e;
-            --border-color: #333;
-            --text-color: #e0e0e0;
-            --text-muted: #888;
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --border-color: #334155;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
             --accent-color: #3b82f6;
             --accent-hover: #2563eb;
             --danger-color: #ef4444;
@@ -22,57 +22,74 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            min-height: 100vh;
             box-sizing: border-box;
         }
 
         header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 15px;
         }
 
+        @media (min-width: 600px) {
+            header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            body {
+                padding: 20px;
+            }
+        }
+
         h1 {
             margin: 0;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .toolbar {
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
             align-items: center;
         }
 
-        button, .file-upload-btn {
+        button, .file-upload-btn, select {
             background-color: var(--panel-bg);
             color: var(--text-color);
             border: 1px solid var(--border-color);
-            padding: 8px 14px;
-            border-radius: 6px;
+            padding: 10px 14px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             transition: background 0.2s, border-color 0.2s;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
         }
 
-        button:hover, .file-upload-btn:hover {
-            background-color: #2a2a2a;
-            border-color: #555;
+        button:hover, .file-upload-btn:hover, select:hover {
+            background-color: #334155;
+            border-color: #64748b;
         }
 
         button.primary {
             background-color: var(--accent-color);
             border-color: var(--accent-color);
             color: white;
+            font-weight: 500;
         }
 
         button.primary:hover {
@@ -80,7 +97,7 @@
         }
 
         button.danger {
-            background-color: rgba(239, 68, 68, 0.1);
+            background-color: rgba(239, 68, 68, 0.15);
             border-color: rgba(239, 68, 68, 0.3);
             color: var(--danger-color);
         }
@@ -94,232 +111,414 @@
             display: none;
         }
 
-        main {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 20px;
-            flex-grow: 1;
-            overflow: hidden;
-        }
-
-        .sidebar {
+        .section-card {
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 15px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        .project-selector-wrapper {
             display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .sidebar h2 {
-            font-size: 1rem;
-            margin-top: 0;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .project-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        .project-item {
-            padding: 10px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
+            gap: 10px;
             align-items: center;
-            transition: background 0.15s;
+            margin-bottom: 15px;
         }
 
-        .project-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .project-item.active {
-            background-color: var(--accent-color);
-            color: white;
-        }
-
-        .workspace {
-            background-color: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
+        .project-selector-wrapper select {
+            flex-grow: 1;
+            padding: 10px;
         }
 
         .stripboard-container {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             margin-top: 15px;
-            overflow-y: auto;
-            padding-right: 5px;
         }
 
         .strip-card {
-            background-color: #262626;
-            border: 1px solid #404040;
+            background-color: #1e293b;
+            border: 1px solid var(--border-color);
             border-left: 6px solid var(--accent-color);
-            border-radius: 4px;
-            padding: 10px 15px;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-sizing: border-box;
+            transition: transform 0.15s, box-shadow 0.15s;
+            cursor: grab;
+        }
+
+        .strip-card.dragging {
+            opacity: 0.4;
+            cursor: grabbing;
+        }
+
+        .strip-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
+            align-items: flex-start;
+            gap: 10px;
         }
 
         .strip-info {
             display: flex;
-            gap: 20px;
-            align-items: center;
+            gap: 12px;
+            align-items: flex-start;
+            flex-grow: 1;
         }
 
         .scene-number {
             font-weight: bold;
             font-size: 1.1rem;
-            min-width: 50px;
+            min-width: 45px;
+            background: rgba(255,255,255,0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .scene-details {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            flex-grow: 1;
+        }
+
+        .scene-title {
+            font-weight: 600;
+            font-size: 1rem;
         }
 
         .scene-desc {
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .scene-dialogue {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-left: 3px solid var(--text-muted);
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            border-radius: 0 4px 4px 0;
+            margin-top: 5px;
+            font-style: italic;
+            white-space: pre-wrap;
+        }
+
+        .strip-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-end;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 8px;
+            margin-top: 5px;
+        }
+
+        .strip-actions button {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        .color-picker-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.1);
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        input[type="color"] {
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            cursor: pointer;
+            background: none;
         }
 
         .empty-state {
             text-align: center;
             color: var(--text-muted);
-            margin-top: 50px;
+            padding: 30px 10px;
+            font-size: 0.95rem;
+        }
+
+        .project-action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Stripboard Studio <span style="font-size: 0.8rem; color: var(--text-muted);">v1.2 Beta</span></h1>
+        <h1>🎬 Stripboard Studio <span style="font-size: 0.75rem; color: var(--text-muted);">Mobile Beta</span></h1>
         <div class="toolbar">
-            <!-- Upload / Download Knoppen -->
-            <label class="file-upload-btn" title="Importeer JSON projectenbestand">
-                📁 Importeer JSON
+            <label class="file-upload-btn" title="Importeer JSON">
+                📁 Import
                 <input type="file" id="importFile" accept=".json" onchange="importData(event)">
             </label>
-            <button onclick="exportData()" title="Exporteer alle projecten naar JSON">💾 Exporteer JSON</button>
-            <button class="primary" onclick="addNewProject()">+ Nieuw Project</button>
+            <button onclick="exportData()" title="Exporteer JSON">💾 Export</button>
+            <button class="primary" onclick="addNewProject()">+ Project</button>
         </div>
     </header>
 
     <main>
-        <div class="sidebar">
-            <h2>Projecten</h2>
-            <ul id="projectList" class="project-list">
-                <!-- Wordt dynamisch gevuld -->
-            </ul>
+        <!-- Project Selectie & Beheer -->
+        <div class="section-card">
+            <div class="project-selector-wrapper">
+                <select id="projectSelect" onchange="switchProject(this.value)">
+                    <!-- Dynamisch gevuld -->
+                </select>
+                <button class="danger" onclick="deleteCurrentProject()" title="Verwijder actief project">🗑️</button>
+            </div>
+            <div class="project-action-row">
+                <span id="projectStats" style="font-size: 0.85rem; color: var(--text-muted);">0 scènes</span>
+                <button class="primary" onclick="addScene()">+ Scène toevoegen</button>
+            </div>
         </div>
 
-        <div class="workspace" id="workspace">
-            <div class="empty-state">Selecteer een project of maak een nieuw project aan om te beginnen.</div>
+        <!-- Stripboard Werkruimte -->
+        <div class="section-card">
+            <h3 style="margin-top: 0; font-size: 1.05rem; color: #fff; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Scènes & Stripboard</h3>
+            <div id="stripboardContainer" class="stripboard-container">
+                <!-- Dynamisch gevuld -->
+            </div>
         </div>
     </main>
 
     <script>
-        // Lokale data structuur (compatibel met de python app)
         let appData = {
             projects: [
                 {
                     id: 1,
-                    title: "VUURWERK - Testproject",
+                    title: "VUURWERK - Hoofdfilm",
                     strips: [
-                        { id: 101, scene: "Sc. 1", intExt: "EXT.", title: "Wijkplein - Nacht", pages: "2 3/8", desc: "Vuurwerk wordt afgestoken op het plein." },
-                        { id: 102, scene: "Sc. 2", intExt: "INT.", title: "Woonkamer - Nacht", pages: "1 1/4", desc: "Gesprek over de jaarwisseling." }
+                        { id: 101, scene: "Sc. 1", intExt: "EXT.", title: "Wijkplein - Nacht", pages: "2 3/8", desc: "Vuurwerk wordt afgestoken op het plein.", dialogue: "Hoor je dat? Prachtig man!", color: "#3b82f6" },
+                        { id: 102, scene: "Sc. 2", intExt: "INT.", title: "Woonkamer - Nacht", pages: "1 1/4", desc: "Gesprek over de jaarwisseling.", dialogue: "Gelukkig nieuwjaar allemaal!", color: "#10b981" }
                     ]
                 }
             ]
         };
 
         let currentProjectId = 1;
+        let draggedIndex = null;
 
         function init() {
             loadFromLocalStorage();
-            renderProjects();
-            selectProject(currentProjectId);
-        }
-
-        function renderProjects() {
-            const list = document.getElementById('projectList');
-            list.innerHTML = '';
-            
-            appData.projects.forEach(project => {
-                const li = document.createElement('li');
-                li.className = `project-item ${project.id === currentProjectId ? 'active' : ''}`;
-                li.innerText = project.title;
-                li.onclick = () => selectProject(project.id);
-                list.appendChild(li);
-            });
-        }
-
-        function selectProject(id) {
-            currentProjectId = id;
-            renderProjects();
+            renderProjectDropdown();
             renderWorkspace();
         }
 
-        function renderWorkspace() {
-            const workspace = document.getElementById('workspace');
-            const project = appData.projects.find(p => p.id === currentProjectId);
+        function renderProjectDropdown() {
+            const select = document.getElementById('projectSelect');
+            select.innerHTML = '';
+            
+            appData.projects.forEach(project => {
+                const opt = document.createElement('option');
+                opt.value = project.id;
+                opt.innerText = project.title;
+                if (project.id === currentProjectId) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
 
-            if (!project) {
-                workspace.innerHTML = `<div class="empty-state">Geen project geselecteerd.</div>`;
+        function switchProject(id) {
+            currentProjectId = Number(id);
+            renderWorkspace();
+        }
+
+        function getCurrentProject() {
+            return appData.projects.find(p => p.id === currentProjectId) || appData.projects[0];
+        }
+
+        function renderWorkspace() {
+            const project = getCurrentProject();
+            if (!project) return;
+
+            // Stats update
+            const totalPages = project.strips.reduce((acc, s) => acc + parsePages(s.pages), 0);
+            document.getElementById('projectStats').innerText = `${project.strips.length} scènes | Geschat: ${(totalPages / 8).toFixed(1)} pag.`;
+
+            const container = document.getElementById('stripboardContainer');
+            container.innerHTML = '';
+
+            if (project.strips.length === 0) {
+                container.innerHTML = `<div class="empty-state">Dit project heeft nog geen scènes. Voeg er een toe via de knop hierboven!</div>`;
                 return;
             }
 
-            let html = `
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-                    <h2 style="margin: 0; color: #fff;">${project.title}</h2>
-                    <div>
-                        <button class="primary" onclick="addScene(${project.id})">+ Scène Toevoegen</button>
-                        <button class="danger" onclick="deleteProject(${project.id})">Verwijder Project</button>
-                    </div>
-                </div>
-                <div class="stripboard-container">
-            `;
+            project.strips.forEach((strip, index) => {
+                const card = document.createElement('div');
+                card.className = 'strip-card';
+                card.style.borderLeftColor = strip.color || '#3b82f6';
+                card.draggable = true;
+                card.dataset.index = index;
 
-            if (project.strips.length === 0) {
-                html += `<div class="empty-state">Dit project heeft nog geen scènes. Voeg er een toe!</div>`;
-            } else {
-                project.strips.forEach(strip => {
-                    html += `
-                        <div class="strip-card">
-                            <div class="strip-info">
-                                <span class="scene-number">${strip.scene}</span>
-                                <div>
-                                    <div style="font-weight: 500;">${strip.intExt} ${strip.title}</div>
-                                    <div class="scene-desc">${strip.desc || ''}</div>
-                                </div>
-                            </div>
-                            <div style="font-size: 0.9rem; color: var(--text-muted);">
-                                ${strip.pages} pag.
+                // Drag and drop events voor desktop & mobiele touch simulatie
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragover', handleDragOver);
+                card.addEventListener('drop', handleDrop);
+                card.addEventListener('dragend', handleDragEnd);
+
+                let dialogueHtml = strip.dialogue ? `<div class="scene-dialogue">💬 "${escapeHtml(strip.dialogue)}"</div>` : '';
+
+                card.innerHTML = `
+                    <div class="strip-header">
+                        <div class="strip-info">
+                            <span class="scene-number">${escapeHtml(strip.scene)}</span>
+                            <div class="scene-details">
+                                <div class="scene-title">${escapeHtml(strip.intExt || 'INT.')} ${escapeHtml(strip.title)}</div>
+                                <div class="scene-desc">${escapeHtml(strip.desc || '')}</div>
+                                ${dialogueHtml}
                             </div>
                         </div>
-                    `;
-                });
-            }
-
-            html += `</div>`;
-            workspace.innerHTML = html;
+                        <div style="font-size: 0.85rem; color: var(--text-muted); text-align: right; min-width: 50px;">
+                            ${escapeHtml(strip.pages)}p
+                        </div>
+                    </div>
+                    <div class="strip-actions">
+                        <div class="color-picker-wrapper" title="Kleur instellen">
+                            🎨 <input type="color" value="${strip.color || '#3b82f6'}" onchange="updateStripColor(${strip.id}, this.value)">
+                        </div>
+                        <button onclick="moveScene(${index}, -1)" ${index === 0 ? 'disabled style="opacity:0.4"' : ''}>⬆️ Omhoog</button>
+                        <button onclick="moveScene(${index}, 1)" ${index === project.strips.length - 1 ? 'disabled style="opacity:0.4"' : ''}>⬇️ Omlaag</button>
+                        <button onclick="editScene(${strip.id})">✏️ Bewerk</button>
+                        <button class="danger" onclick="deleteScene(${strip.id})">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
 
+        // --- DRAG AND DROP LOGICA ---
+        function handleDragStart(e) {
+            draggedIndex = Number(this.dataset.index);
+            this.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const targetIndex = Number(this.dataset.index);
+            if (draggedIndex === null || draggedIndex === targetIndex) return;
+
+            const project = getCurrentProject();
+            const movedItem = project.strips.splice(draggedIndex, 1)[0];
+            project.strips.splice(targetIndex, 0, movedItem);
+
+            saveToLocalStorage();
+            renderWorkspace();
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            draggedIndex = null;
+        }
+
+        // --- ACTIES VOOR SCÈNES ---
+        function moveScene(index, direction) {
+            const project = getCurrentProject();
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= project.strips.length) return;
+
+            const temp = project.strips[index];
+            project.strips[index] = project.strips[newIndex];
+            project.strips[newIndex] = temp;
+
+            saveToLocalStorage();
+            renderWorkspace();
+        }
+
+        function addScene() {
+            const project = getCurrentProject();
+            const sceneNr = prompt("Scènenummer (bijv. Sc. 3):", `Sc. ${project.strips.length + 1}`);
+            if (!sceneNr) return;
+
+            const intExt = prompt("INT. of EXT.?", "INT.");
+            const title = prompt("Locatie / Titel:", "Straat - Dag");
+            const pages = prompt("Aantal pagina's (bijv. 1 2/8 of 2):", "1 0/8");
+            const desc = prompt("Korte beschrijving van de scène:", "");
+            const dialogue = prompt("Belangrijke dialoog / notitie (optioneel):", "");
+
+            project.strips.push({
+                id: Date.now(),
+                scene: sceneNr,
+                intExt: intExt || "INT.",
+                title: title || "Naamloze locatie",
+                pages: pages || "1",
+                desc: desc || "",
+                dialogue: dialogue || "",
+                color: "#3b82f6"
+            });
+
+            saveToLocalStorage();
+            renderWorkspace();
+        }
+
+        function editScene(id) {
+            const project = getCurrentProject();
+            const strip = project.strips.find(s => s.id === id);
+            if (!strip) return;
+
+            const sceneNr = prompt("Scènenummer:", strip.scene);
+            if (sceneNr === null) return;
+
+            const intExt = prompt("INT. of EXT.?", strip.intExt);
+            const title = prompt("Locatie / Titel:", strip.title);
+            const pages = prompt("Aantal pagina's:", strip.pages);
+            const desc = prompt("Beschrijving:", strip.desc);
+            const dialogue = prompt("Dialoog / Notitie:", strip.dialogue);
+
+            strip.scene = sceneNr;
+            strip.intExt = intExt;
+            strip.title = title;
+            strip.pages = pages;
+            strip.desc = desc;
+            strip.dialogue = dialogue;
+
+            saveToLocalStorage();
+            renderWorkspace();
+        }
+
+        function updateStripColor(id, color) {
+            const project = getCurrentProject();
+            const strip = project.strips.find(s => s.id === id);
+            if (strip) {
+                strip.color = color;
+                saveToLocalStorage();
+                renderWorkspace();
+            }
+        }
+
+        function deleteScene(id) {
+            if (!confirm("Weet je zeker dat je deze scène wilt verwijderen?")) return;
+            const project = getCurrentProject();
+            project.strips = project.strips.filter(s => s.id !== id);
+            saveToLocalStorage();
+            renderWorkspace();
+        }
+
+        // --- PROJECT BEHEER ---
         function addNewProject() {
-            const title = prompt("Voer de naam van het nieuwe project in:", "Nieuw Filmproject");
+            const title = prompt("Naam van het nieuwe filmproject:", "Nieuwe Film");
             if (!title) return;
 
             const newId = Date.now();
@@ -329,68 +528,69 @@
                 strips: []
             });
 
+            currentProjectId = newId;
             saveToLocalStorage();
-            selectProject(newId);
+            renderProjectDropdown();
+            renderWorkspace();
         }
 
-        function deleteProject(id) {
+        function deleteCurrentProject() {
             if (appData.projects.length <= 1) {
                 alert("Je kunt het laatste project niet verwijderen.");
                 return;
             }
-            if (confirm("Weet je zeker dat je dit project wilt verwijderen?")) {
-                appData.projects = appData.projects.filter(p => p.id !== id);
-                currentProjectId = appData.projects[0].id;
-                saveToLocalStorage();
-                renderProjects();
-                selectProject(currentProjectId);
-            }
-        }
+            if (!confirm("Weet je zeker dat je dit hele project wilt verwijderen?")) return;
 
-        function addScene(projectId) {
-            const project = appData.projects.find(p => p.id === projectId);
-            if (!project) return;
-
-            const sceneNr = prompt("Scènenummer (bijv. Sc. 3):", `Sc. ${project.strips.length + 1}`);
-            if (!sceneNr) return;
-
-            const title = prompt("Locatie / Titel:", "Straat - Dag");
-            const pages = prompt("Aantal pagina's (bijv. 1 2/8):", "1 0/8");
-            const desc = prompt("Korte beschrijving:", "");
-
-            project.strips.push({
-                id: Date.now(),
-                scene: sceneNr,
-                intExt: "INT.",
-                title: title || "Locatie",
-                pages: pages || "1",
-                desc: desc || ""
-            });
-
+            appData.projects = appData.projects.filter(p => p.id !== currentProjectId);
+            currentProjectId = appData.projects[0].id;
             saveToLocalStorage();
+            renderProjectDropdown();
             renderWorkspace();
         }
 
-        // Opslaan en inladen via localStorage in browser
+        // --- HELPERS ---
+        function parsePages(pagesStr) {
+            if (!pagesStr) return 8;
+            let parts = pagesStr.trim().split(' ');
+            let total = 0;
+            for (let part of parts) {
+                if (part.includes('/')) {
+                    let [num, den] = part.split('/').map(Number);
+                    if (den) total += (num / den) * 8;
+                } else {
+                    let num = Number(part);
+                    if (!isNaN(num)) total += num * 8;
+                }
+            }
+            return total || 8;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // --- OPSLAAN & LADEN ---
         function saveToLocalStorage() {
-            localStorage.setItem('stripboard_data', JSON.stringify(appData));
+            localStorage.setItem('stripboard_mobile_data', JSON.stringify(appData));
         }
 
         function loadFromLocalStorage() {
-            const saved = localStorage.getItem('stripboard_data');
+            const saved = localStorage.getItem('stripboard_mobile_data');
             if (saved) {
                 try {
-                    appData = JSON.parse(saved);
-                    if (appData.projects && appData.projects.length > 0) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.projects && parsed.projects.length > 0) {
+                        appData = parsed;
                         currentProjectId = appData.projects[0].id;
                     }
                 } catch (e) {
-                    console.error("Fout bij laden lokale data:", e);
+                    console.error("Fout bij laden:", e);
                 }
             }
         }
 
-        // --- EXPORT FUNCTIE (DOWNLOAD JSON) ---
+        // --- EXPORT & IMPORT ---
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 4));
             const downloadAnchor = document.createElement('a');
@@ -401,7 +601,6 @@
             downloadAnchor.remove();
         }
 
-        // --- IMPORT FUNCTIE (UPLOAD JSON) ---
         function importData(event) {
             const fileReader = new FileReader();
             if (event.target.files[0]) {
@@ -415,20 +614,19 @@
                             if (appData.projects.length > 0) {
                                 currentProjectId = appData.projects[0].id;
                             }
-                            renderProjects();
+                            renderProjectDropdown();
                             renderWorkspace();
                             alert("Projecten succesvol geïmporteerd!");
                         } else {
-                            alert("Ongeldig bestandsformaat: mist 'projects' array.");
+                            alert("Ongeldig bestandsformaat.");
                         }
                     } catch (error) {
-                        alert("Fout bij het lezen van het JSON-bestand: " + error);
+                        alert("Fout bij inlezen JSON: " + error);
                     }
                 };
             }
         }
 
-        // Start applicatie
         init();
     </script>
 </body>
