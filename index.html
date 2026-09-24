@@ -121,7 +121,6 @@
             display: none;
         }
 
-        /* Hoofd container in Windows-app stijl */
         .main-card {
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
@@ -166,7 +165,6 @@
             box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15);
         }
 
-        /* Stripboard container & Stijlen */
         .stripboard-container {
             display: flex;
             flex-direction: column;
@@ -361,7 +359,6 @@
                 card.addEventListener('drop', handleDrop);
                 card.addEventListener('dragend', handleDragEnd);
 
-                // Klik selectie & dubbelklik bewerken
                 card.addEventListener('click', (e) => {
                     if (e.target.tagName === 'INPUT') return;
                     strip.selected = !strip.selected;
@@ -373,7 +370,6 @@
                     editStrip(strip.id);
                 });
 
-                // Rechtermuisknop menu nabootsen
                 card.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
                     if (confirm(`Actie voor "${strip.title}":\n[OK] = Verwijderen\n[Annuleren] = Kleur wijzigen`)) {
@@ -473,11 +469,24 @@
 
         function handleDrop(e) {
             e.preventDefault();
-            const targetIndex = Number(this.dataset.index);
-            if (draggedIndex === null || draggedIndex === targetIndex) return;
+            if (draggedIndex === null) return;
+
+            const rect = this.getBoundingClientRect();
+            const midpoint = rect.top + rect.height / 2;
+            let targetIndex = Number(this.dataset.index);
+
+            // Als de muis in de onderste helft van het blok zit, plaats hem eronder
+            if (e.clientY > midpoint) {
+                targetIndex += 1;
+            }
 
             const project = getCurrentProject();
             const movedItem = project.strips.splice(draggedIndex, 1)[0];
+
+            if (draggedIndex < targetIndex) {
+                targetIndex -= 1;
+            }
+
             project.strips.splice(targetIndex, 0, movedItem);
 
             saveToLocalStorage();
@@ -508,7 +517,7 @@
 
         function renameCurrentProject() {
             const project = getCurrentProject();
-            const newTitle = prompt("HernoeM filmproject:", project.title);
+            const newTitle = prompt("Hernoem filmproject:", project.title);
             if (newTitle && newTitle.trim() !== "") {
                 project.title = newTitle.trim();
                 saveToLocalStorage();
