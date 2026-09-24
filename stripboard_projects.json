@@ -23,6 +23,12 @@
       "text": "HMO 2",
       "color": "#ffffff",
       "dialogue": ""
+    },
+    {
+      "type": "strip",
+      "text": "HMO3",
+      "color": "#ffffff",
+      "dialogue": ""
     }
   ]
 }
