@@ -68,7 +68,7 @@
             cursor: pointer;
         }
 
-        button, .file-upload-btn {
+        button {
             background-color: var(--panel-bg);
             color: var(--text-color);
             border: 1px solid var(--border-color);
@@ -84,7 +84,7 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
-        button:hover, .file-upload-btn:hover {
+        button:hover {
             background-color: #e2e8f0;
             border-color: #94a3b8;
         }
@@ -115,10 +115,6 @@
         }
         button.danger-text:hover {
             background-color: #fee2e2;
-        }
-
-        input[type="file"] {
-            display: none;
         }
 
         .main-card {
@@ -330,14 +326,6 @@
                     <!-- Dynamisch -->
                 </select>
             </div>
-            <button onclick="exportData()">📥 Download</button>
-            
-            <!-- Directe upload knop zonder extra menu -->
-            <button class="file-upload-btn" onclick="document.getElementById('importFile').click()">
-                📤 Upload
-            </button>
-            <input type="file" id="importFile" accept=".json" onchange="importData(event)">
-
             <button class="dark-btn" onclick="addNewProject()">+ Nieuw</button>
             <button onclick="renameCurrentProject()">Hernoem</button>
             <button class="danger-text" onclick="deleteCurrentProject()">Verwijder</button>
@@ -709,40 +697,6 @@
                 } catch (e) {
                     console.error("Fout bij laden:", e);
                 }
-            }
-        }
-
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 4));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "film_stripboard_project.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        function importData(event) {
-            const fileReader = new FileReader();
-            if (event.target.files[0]) {
-                fileReader.readAsText(event.target.files[0], "UTF-8");
-                fileReader.onload = (e) => {
-                    try {
-                        const parsedData = JSON.parse(e.target.result);
-                        if (parsedData.projects && Array.isArray(parsedData.projects)) {
-                            appData = parsedData;
-                            saveToLocalStorage();
-                            currentProjectId = appData.projects[0].id;
-                            renderProjectDropdown();
-                            renderWorkspace();
-                            alert("Projecten succesvol geladen!");
-                        } else {
-                            alert("Ongeldig bestandsformaat.");
-                        }
-                    } catch (error) {
-                        alert("Fout bij inlezen JSON: " + error);
-                    }
-                };
             }
         }
 
