@@ -134,6 +134,28 @@
             color: var(--text-color);
         }
 
+        .logline-row {
+            margin-bottom: 20px;
+        }
+
+        .logline-row input[type="text"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            background: #f8fafc;
+            box-sizing: border-box;
+            color: var(--text-color);
+        }
+
+        .logline-row input[type="text"]:focus {
+            border-color: var(--accent-color);
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15);
+        }
+
         .input-row {
             display: flex;
             gap: 10px;
@@ -348,6 +370,10 @@
             <h2 id="mainProjectTitle" class="project-title">Mijn Eerste Film</h2>
         </div>
 
+        <div class="logline-row">
+            <input type="text" id="projectLoglineInput" placeholder="Enter logline..." onblur="updateLogline(this.value)">
+        </div>
+
         <div class="input-row">
             <input type="text" id="newPlotInput" placeholder="Enter a one-sentence plot point..." onkeydown="if(event.key === 'Enter') addStrip()">
             <button class="dark-btn" onclick="addStrip()">Add Strip</button>
@@ -387,6 +413,7 @@
                 {
                     id: 1,
                     title: "Mijn Eerste Film",
+                    logline: "",
                     strips: [
                         { id: 1, title: "", type: "divider", selected: false, colorMenuOpen: false },
                         { id: 2, title: "", type: "divider", selected: false, colorMenuOpen: false },
@@ -418,6 +445,10 @@
                 if (cloudData && cloudData.projects) {
                     isRemoteUpdate = true;
                     appData = cloudData;
+                    // Zorg ervoor dat elke project-object een logline property heeft (voor migratie van oudere data)
+                    appData.projects.forEach(p => {
+                        if (p.logline === undefined) p.logline = "";
+                    });
                     if (!appData.projects.some(p => p.id === currentProjectId)) {
                         currentProjectId = appData.projects[0].id;
                     }
@@ -443,6 +474,7 @@
             const select = document.getElementById('projectSelect');
             select.innerHTML = '';
             appData.projects.forEach(project => {
+                if (project.logline === undefined) project.logline = "";
                 const opt = document.createElement('option');
                 opt.value = project.id;
                 opt.innerText = project.title;
@@ -450,8 +482,14 @@
                 select.appendChild(opt);
             });
             const mainTitle = document.getElementById('mainProjectTitle');
+            const loglineInput = document.getElementById('projectLoglineInput');
             const currentProj = getCurrentProject();
             if (mainTitle && currentProj) mainTitle.innerText = currentProj.title;
+            if (loglineInput && currentProj) {
+                if (document.activeElement !== loglineInput) {
+                    loglineInput.value = currentProj.logline || "";
+                }
+            }
         }
 
         window.switchProject = function(id) {
@@ -461,7 +499,17 @@
         }
 
         function getCurrentProject() {
-            return appData.projects.find(p => p.id === currentProjectId) || appData.projects[0];
+            let p = appData.projects.find(p => p.id === currentProjectId) || appData.projects[0];
+            if (p && p.logline === undefined) p.logline = "";
+            return p;
+        }
+
+        window.updateLogline = function(text) {
+            const project = getCurrentProject();
+            if (project && project.logline !== text) {
+                project.logline = text;
+                saveToFirebase();
+            }
         }
 
         window.renderWorkspace = function() {
@@ -701,6 +749,7 @@
             appData.projects.push({
                 id: newId,
                 title: title.trim(),
+                logline: "",
                 strips: [
                     { id: Date.now() + 1, title: "", type: "divider", selected: false, colorMenuOpen: false },
                     { id: Date.now() + 2, title: "", type: "divider", selected: false, colorMenuOpen: false },
